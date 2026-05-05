@@ -275,7 +275,7 @@ const NewPostModal = ({ accounts, onClose, onCreated }) => {
           fd.append('description', post.description || '');
           const tags = post.hashtags.split(/[\s,]+/).filter(Boolean).map(h => h.startsWith('#') ? h : `#${h}`);
           fd.append('hashtags', JSON.stringify(tags));
-          fd.append('scheduled_at', post.scheduled_at);
+          fd.append('scheduled_at', new Date(post.scheduled_at).toISOString());
           if (post.file) fd.append('media', post.file);
           else if (post.media_url) fd.append('media_url', post.media_url);
 
