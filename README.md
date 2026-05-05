@@ -2,6 +2,15 @@
 
 منصة SaaS عربية متكاملة لأتمتة الأعمال بالذكاء الاصطناعي، مع نظام جدولة محتوى مواقع التواصل الاجتماعي.
 
+## الروابط المباشرة
+
+| الخدمة | الرابط |
+|--------|--------|
+| الواجهة (Vercel) | https://rpa-now.vercel.app |
+| Backend API (Railway) | https://rpa-now-production.up.railway.app/api |
+| GitHub | https://github.com/mansorAI/rpa-now |
+| قاعدة البيانات | Supabase PostgreSQL |
+
 ---
 
 ## المميزات الرئيسية
@@ -97,17 +106,31 @@ RPA/
 
 ---
 
-## التشغيل السريع
+## النشر (Production)
+
+| الطبقة | المنصة | الرابط |
+|--------|--------|--------|
+| Frontend | Vercel | https://rpa-now.vercel.app |
+| Backend | Railway | https://rpa-now-production.up.railway.app |
+| Database | Supabase | PostgreSQL managed |
+
+### متغيرات Vercel المطلوبة
+```
+VITE_API_URL=https://rpa-now-production.up.railway.app/api
+```
+
+---
+
+## التشغيل المحلي
 
 ### المتطلبات
 - Node.js 18+
-- PostgreSQL 14+ أو حساب Supabase
+- حساب Supabase (قاعدة البيانات)
 
 ### 1. إعداد البيئة
 ```bash
 cp backend/.env.example backend/.env
-# عدّل backend/.env وأضف:
-# DATABASE_URL، OPENAI_API_KEY، وباقي المفاتيح
+# عدّل backend/.env وأضف DATABASE_URL وباقي المفاتيح
 ```
 
 ### 2. تثبيت التبعيات
@@ -118,9 +141,7 @@ cd ../frontend && npm install
 
 ### 3. تشغيل هجرة قاعدة البيانات
 ```bash
-cd backend
-npm run migrate
-node -e "require('dotenv').config(); const fs=require('fs'); const {pool}=require('./config/database'); pool.query(fs.readFileSync('./database/social_schema.sql','utf8')).then(()=>{console.log('✅ Social tables created');pool.end();})"
+cd backend && npm run migrate
 ```
 
 ### 4. تشغيل المشروع
@@ -132,14 +153,9 @@ cd backend && npm run dev
 cd frontend && npm run dev
 ```
 
-### أو بـ Docker
-```bash
-docker-compose up --build
-```
-
 ---
 
-## الروابط
+## الروابط المحلية (Development)
 
 | الخدمة | الرابط |
 |--------|--------|
