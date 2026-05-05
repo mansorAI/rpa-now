@@ -504,6 +504,14 @@ export default function SocialScheduler() {
     load();
   };
 
+  const retryPost = async (id) => {
+    try {
+      await api.put(`/social/posts/${id}`, { status: 'scheduled', scheduled_at: new Date(Date.now() + 60000).toISOString() });
+      toast.success('سيُعاد النشر خلال دقيقة');
+      load();
+    } catch { toast.error('فشلت إعادة المحاولة'); }
+  };
+
   const connectedPlatforms = [...new Set(accounts.map(a => a.platform))];
   const filteredPosts = posts.filter(p => activeTab === 'all' || p.status === activeTab);
 
@@ -667,7 +675,16 @@ export default function SocialScheduler() {
                         <CheckCircle className="w-5 h-5 text-emerald-400" />
                       )}
                       {post.status === 'failed' && (
-                        <XCircle className="w-5 h-5 text-red-400" />
+                        <div className="flex items-center gap-1">
+                          <button onClick={() => retryPost(post.id)}
+                            className="p-2 text-slate-500 hover:text-emerald-400 hover:bg-emerald-400/10 rounded-lg transition-all" title="إعادة محاولة">
+                            <Send className="w-4 h-4" />
+                          </button>
+                          <button onClick={() => deletePost(post.id)}
+                            className="p-2 text-slate-500 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-all" title="حذف">
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
                       )}
                     </div>
                   </div>

@@ -150,8 +150,8 @@ const updatePost = async (req, res, next) => {
         hashtags = COALESCE($3, hashtags),
         scheduled_at = COALESCE($4, scheduled_at),
         status = COALESCE($5, status)
-       WHERE id = $6 AND workspace_id = $7 AND status = 'scheduled' RETURNING *`,
-      [title, description, hashtags, scheduled_at ? new Date(scheduled_at) : null, status, req.params.id, req.workspace.id]
+       WHERE id = $6 AND workspace_id = $7 AND status IN ('scheduled','failed') RETURNING *`,
+      [title, description, parseArr(hashtags), scheduled_at ? new Date(scheduled_at) : null, status, req.params.id, req.workspace.id]
     );
     if (!rows[0]) return res.status(404).json({ error: 'المنشور غير موجود أو تم نشره بالفعل' });
     res.json({ post: rows[0] });
