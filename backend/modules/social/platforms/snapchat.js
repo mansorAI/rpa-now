@@ -3,12 +3,13 @@ const fs = require('fs');
 
 const SNAP_API = 'https://adsapi.snapchat.com/v1';
 
-const getAuthUrl = () => {
+const getAuthUrl = (state) => {
   const params = new URLSearchParams({
     client_id: process.env.SNAPCHAT_CLIENT_ID,
     redirect_uri: process.env.SNAPCHAT_REDIRECT_URI,
     response_type: 'code',
     scope: 'snapchat-marketing-api',
+    state: state || 'snap_auth',
   });
   return `https://accounts.snapchat.com/login/oauth2/authorize?${params}`;
 };

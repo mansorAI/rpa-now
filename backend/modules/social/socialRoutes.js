@@ -3,6 +3,7 @@ const multer = require('multer');
 const path = require('path');
 const { authenticate, attachWorkspace } = require('../auth/authMiddleware');
 const ctrl = require('./socialController');
+const cb = require('./oauthCallbacks');
 
 // File upload config
 const storage = multer.diskStorage({
@@ -19,13 +20,28 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage,
-  limits: { fileSize: 500 * 1024 * 1024 }, // 500MB
+  limits: { fileSize: 500 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     const allowed = ['video/mp4', 'video/quicktime', 'video/webm', 'image/jpeg', 'image/png', 'image/gif'];
     cb(null, allowed.includes(file.mimetype));
   },
 });
 
+// OAuth callbacks (no auth required — redirect from platform)
+router.get('/auth/twitter/callback', cb.twitterCallback);
+router.get('/auth/youtube/callback', cb.youtubeCallback);
+router.get('/auth/facebook/callback', cb.facebookCallback);
+router.get('/auth/instagram/callback', cb.instagramCallback);
+router.get('/auth/tiktok/callback', cb.tiktokCallback);
+router.get('/auth/snapchat/callback', cb.snapchatCallback);
+// Legacy callback paths (match Railway env vars)
+router.get('/accounts/youtube/callback', cb.youtubeCallback);
+router.get('/accounts/facebook/callback', cb.facebookCallback);
+router.get('/accounts/instagram/callback', cb.instagramCallback);
+router.get('/accounts/tiktok/callback', cb.tiktokCallback);
+router.get('/accounts/snapchat/callback', cb.snapchatCallback);
+
+// All routes below require authentication
 router.use(authenticate, attachWorkspace);
 
 // Stats

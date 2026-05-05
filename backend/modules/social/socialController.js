@@ -9,14 +9,7 @@ const instagram = require('./platforms/instagram');
 const tiktok = require('./platforms/tiktok');
 const snapchat = require('./platforms/snapchat');
 
-const PLATFORM_AUTH = {
-  youtube:   () => youtube.getAuthUrl(),
-  twitter:   () => twitter.getAuthUrl(),
-  facebook:  () => facebook.getAuthUrl(),
-  instagram: () => instagram.getAuthUrl(),
-  tiktok:    () => tiktok.getAuthUrl(),
-  snapchat:  () => snapchat.getAuthUrl(),
-};
+const oauthStore = require('./oauthStore');
 
 // --- Accounts ---
 const getAccounts = async (req, res, next) => {
@@ -32,10 +25,28 @@ const getAccounts = async (req, res, next) => {
 const getAuthUrl = async (req, res, next) => {
   try {
     const { platform } = req.params;
-    if (!PLATFORM_AUTH[platform]) return res.status(400).json({ error: 'منصة غير مدعومة' });
-    const result = await PLATFORM_AUTH[platform]();
-    const url = typeof result === 'string' ? result : result.url;
-    res.json({ url, ...(typeof result === 'object' ? result : {}) });
+    const state = Buffer.from(JSON.stringify({ workspaceId: req.workspace.id, userId: req.user.id })).toString('base64url');
+
+    let url;
+    if (platform === 'twitter') {
+      const result = twitter.getAuthUrl(state);
+      oauthStore.set(state, { workspaceId: req.workspace.id, userId: req.user.id, codeVerifier: result.codeVerifier });
+      url = result.url;
+    } else if (platform === 'youtube') {
+      url = youtube.getAuthUrl(state);
+    } else if (platform === 'facebook') {
+      url = facebook.getAuthUrl(state);
+    } else if (platform === 'instagram') {
+      url = instagram.getAuthUrl(state);
+    } else if (platform === 'tiktok') {
+      url = tiktok.getAuthUrl(state);
+    } else if (platform === 'snapchat') {
+      url = snapchat.getAuthUrl(state);
+    } else {
+      return res.status(400).json({ error: 'منصة غير مدعومة' });
+    }
+
+    res.json({ url });
   } catch (err) { next(err); }
 };
 

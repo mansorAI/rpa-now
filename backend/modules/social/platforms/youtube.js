@@ -14,7 +14,7 @@ const getOAuthClient = (credentials) => {
   return oauth2Client;
 };
 
-const getAuthUrl = () => {
+const getAuthUrl = (state) => {
   const oauth2Client = new google.auth.OAuth2(
     process.env.YOUTUBE_CLIENT_ID,
     process.env.YOUTUBE_CLIENT_SECRET,
@@ -24,6 +24,7 @@ const getAuthUrl = () => {
     access_type: 'offline',
     scope: ['https://www.googleapis.com/auth/youtube.upload', 'https://www.googleapis.com/auth/youtube.readonly'],
     prompt: 'consent',
+    state: state || '',
   });
 };
 

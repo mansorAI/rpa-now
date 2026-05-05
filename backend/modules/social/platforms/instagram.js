@@ -4,12 +4,13 @@ const fs = require('fs');
 
 const FB_API = 'https://graph.facebook.com/v18.0';
 
-const getAuthUrl = () => {
+const getAuthUrl = (state) => {
   const params = new URLSearchParams({
     client_id: process.env.FACEBOOK_APP_ID,
     redirect_uri: process.env.INSTAGRAM_REDIRECT_URI,
     scope: 'instagram_basic,instagram_content_publish,pages_read_engagement',
     response_type: 'code',
+    state: state || 'ig_auth',
   });
   return `https://www.facebook.com/v18.0/dialog/oauth?${params}`;
 };
