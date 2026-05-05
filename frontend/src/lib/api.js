@@ -1,8 +1,11 @@
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
+const BASE_URL = import.meta.env.VITE_API_URL ||
+  (import.meta.env.PROD ? 'https://rpa-now-production.up.railway.app/api' : '/api');
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '/api',
+  baseURL: BASE_URL,
   headers: { 'Content-Type': 'application/json' },
 });
 
