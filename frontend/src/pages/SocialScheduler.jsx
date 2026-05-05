@@ -464,6 +464,7 @@ export default function SocialScheduler() {
   const [loading, setLoading] = useState(true);
   const [showConnect, setShowConnect] = useState(null);
   const [showNewPost, setShowNewPost] = useState(false);
+  const [editPost, setEditPost] = useState(null);
   const [activeTab, setActiveTab] = useState('scheduled');
   const [filterPlatform, setFilterPlatform] = useState('');
 
@@ -651,10 +652,16 @@ export default function SocialScheduler() {
                         </p>
                       </div>
                       {post.status === 'scheduled' && (
-                        <button onClick={() => deletePost(post.id)}
-                          className="p-2 text-slate-500 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-all">
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                        <div className="flex items-center gap-1">
+                          <button onClick={() => setEditPost(post)}
+                            className="p-2 text-slate-500 hover:text-blue-400 hover:bg-blue-400/10 rounded-lg transition-all" title="تعديل">
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+                          <button onClick={() => deletePost(post.id)}
+                            className="p-2 text-slate-500 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-all" title="حذف">
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
                       )}
                       {post.status === 'posted' && (
                         <CheckCircle className="w-5 h-5 text-emerald-400" />
@@ -678,6 +685,78 @@ export default function SocialScheduler() {
       {showNewPost && (
         <NewPostModal accounts={accounts} onClose={() => setShowNewPost(false)} onCreated={load} />
       )}
+      {editPost && (
+        <EditPostModal post={editPost} onClose={() => setEditPost(null)} onSaved={load} />
+      )}
+    </div>
+  );
+}
+
+// ---- Edit Post Modal ----
+function EditPostModal({ post, onClose, onSaved }) {
+  const toLocal = (iso) => {
+    if (!iso) return '';
+    const d = new Date(iso);
+    const pad = n => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  };
+
+  const [form, setForm] = useState({
+    title: post.title || '',
+    description: post.description || '',
+    hashtags: post.hashtags?.join(' ') || '',
+    scheduled_at: toLocal(post.scheduled_at),
+  });
+  const [loading, setLoading] = useState(false);
+
+  const save = async () => {
+    if (!form.scheduled_at) return toast.error('حدد وقت النشر');
+    setLoading(true);
+    try {
+      const tags = form.hashtags.split(/[\s,]+/).filter(Boolean).map(h => h.startsWith('#') ? h : `#${h}`);
+      await api.put(`/social/posts/${post.id}`, {
+        title: form.title,
+        description: form.description,
+        hashtags: tags,
+        scheduled_at: new Date(form.scheduled_at).toISOString(),
+      });
+      toast.success('تم تحديث المنشور');
+      onSaved(); onClose();
+    } catch { toast.error('فشل التحديث'); } finally { setLoading(false); }
+  };
+
+  const plt = PLATFORMS.find(p => p.value === post.platform);
+
+  return (
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+      <div className="bg-dark-800 border border-dark-600 rounded-2xl w-full max-w-md p-6 space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className={`w-9 h-9 rounded-xl ${plt?.bg} flex items-center justify-center ${plt?.text}`}>{plt?.svg}</div>
+            <h3 className="font-bold text-white">تعديل المنشور</h3>
+          </div>
+          <button onClick={onClose} className="text-slate-400 hover:text-white"><X className="w-4 h-4" /></button>
+        </div>
+
+        <input value={form.title} onChange={e => setForm(f => ({...f, title: e.target.value}))}
+          className="input text-sm" placeholder="العنوان" />
+        <textarea value={form.description} onChange={e => setForm(f => ({...f, description: e.target.value}))}
+          className="input text-sm resize-none h-24" placeholder="الوصف / النص" />
+        <input value={form.hashtags} onChange={e => setForm(f => ({...f, hashtags: e.target.value}))}
+          className="input text-sm" placeholder="هاشتاقات (مفصولة بمسافة)" />
+        <div>
+          <label className="text-xs text-slate-400 mb-1 block">وقت النشر</label>
+          <input type="datetime-local" value={form.scheduled_at} onChange={e => setForm(f => ({...f, scheduled_at: e.target.value}))}
+            className="input text-sm" />
+        </div>
+
+        <div className="flex gap-2 pt-1">
+          <button onClick={save} disabled={loading} className="btn-primary flex-1 justify-center text-sm py-2.5">
+            {loading ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : 'حفظ التعديلات'}
+          </button>
+          <button onClick={onClose} className="btn-ghost text-sm py-2.5">إلغاء</button>
+        </div>
+      </div>
     </div>
   );
 }
