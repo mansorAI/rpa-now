@@ -17,8 +17,9 @@ const publishPost = async (post) => {
   if (!account) throw new Error('الحساب غير موجود');
 
   const filePath = post.media_path ? path.join(__dirname, '../../../uploads', post.media_path) : null;
+  const creds = typeof account.credentials === 'string' ? JSON.parse(account.credentials) : account.credentials;
   const params = {
-    credentials: account.credentials,
+    credentials: creds,
     filePath,
     mediaUrl: post.media_url,
     title: post.title,

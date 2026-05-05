@@ -41,13 +41,30 @@ const getAccountInfo = async () => {
   return data;
 };
 
-const postTweet = async ({ credentials, text, description, hashtags = [], mediaPath, title }) => {
-  let client;
-  if (credentials.oauth2_access_token) {
-    client = new TwitterApi(credentials.oauth2_access_token);
-  } else {
-    client = getClient(credentials);
+const getOAuth2Client = async (credentials) => {
+  if (credentials.oauth2_refresh_token) {
+    try {
+      const base = new TwitterApi({
+        clientId: process.env.TWITTER_API_KEY,
+        clientSecret: process.env.TWITTER_API_SECRET,
+      });
+      const { client } = await base.refreshOAuth2Token(credentials.oauth2_refresh_token);
+      return client;
+    } catch {
+      // Fall through to OAuth 1.0a
+    }
   }
+  if (credentials.oauth2_access_token) {
+    return new TwitterApi(credentials.oauth2_access_token);
+  }
+  return null;
+};
+
+const postTweet = async ({ credentials, text, description, hashtags = [], mediaPath, title }) => {
+  const creds = typeof credentials === 'string' ? JSON.parse(credentials) : credentials;
+
+  let client = await getOAuth2Client(creds);
+  if (!client) client = getClient(creds);
 
   const content = text || description || title || '';
   const tags = hashtags.length > 0 ? '\n' + hashtags.join(' ') : '';
@@ -56,9 +73,8 @@ const postTweet = async ({ credentials, text, description, hashtags = [], mediaP
   if (mediaPath) {
     const fs = require('fs');
     if (fs.existsSync(mediaPath)) {
-      const rwClient = client.readWrite;
-      const mediaId = await rwClient.v1.uploadMedia(mediaPath);
-      const { data } = await rwClient.v2.tweet({ text: fullText, media: { media_ids: [mediaId] } });
+      const mediaId = await client.v1.uploadMedia(mediaPath);
+      const { data } = await client.v2.tweet({ text: fullText, media: { media_ids: [mediaId] } });
       return { platform_post_id: data.id, url: `https://x.com/i/web/status/${data.id}` };
     }
   }
