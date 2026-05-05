@@ -182,18 +182,12 @@ const ConnectModal = ({ platform, onClose, onConnected }) => {
         </div>
 
         <div className="space-y-3">
-          {platform === 'twitter' && (
-            <button onClick={startOAuth}
-              className="w-full py-2.5 bg-black border border-slate-600 hover:border-slate-400 rounded-xl text-sm text-white flex items-center justify-center gap-2 transition-all">
-              <span className="text-white">{p?.svg}</span> تسجيل الدخول بـ X
-            </button>
-          )}
-          {['youtube','facebook','instagram','tiktok'].includes(platform) && (
-            <button onClick={startOAuth}
-              className={`w-full py-2.5 ${p?.bg} border ${p?.border} hover:opacity-100 opacity-80 rounded-xl text-sm ${p?.text} flex items-center justify-center gap-2 transition-all`}>
-              {p?.svg} ربط عبر OAuth
-            </button>
-          )}
+          <button onClick={startOAuth}
+            className={`w-full py-2.5 rounded-xl text-sm flex items-center justify-center gap-2 transition-all border font-medium
+              ${platform === 'twitter' ? 'bg-black border-slate-600 hover:border-slate-400 text-white' : `${p?.bg} ${p?.border} ${p?.text} hover:opacity-100 opacity-80`}`}>
+            <span>{p?.svg}</span>
+            {platform === 'twitter' ? 'تسجيل الدخول بـ X' : `ربط ${p?.label} عبر OAuth`}
+          </button>
 
           <div className="flex items-center gap-2 text-xs text-slate-600">
             <div className="flex-1 h-px bg-dark-600" /> أو يدوياً <div className="flex-1 h-px bg-dark-600" />
@@ -487,6 +481,20 @@ export default function SocialScheduler() {
   };
 
   useEffect(load, [filterPlatform]);
+
+  // Handle OAuth redirect (?connected=platform or ?error=platform)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const connected = params.get('connected');
+    const error = params.get('error');
+    if (connected) {
+      const p = PLATFORMS.find(x => x.value === connected);
+      toast.success(`تم ربط ${p?.label || connected} بنجاح!`);
+      load();
+    }
+    if (error) toast.error(`فشل ربط الحساب: ${error}`);
+    if (connected || error) window.history.replaceState({}, '', window.location.pathname);
+  }, []);
 
   const deletePost = async (id) => {
     if (!confirm('حذف هذا المنشور؟')) return;
