@@ -27,10 +27,13 @@
 - مثال: *"إذا وصلتني رسالة SMS تحتوي مبلغاً أكثر من 300 ريال، سجّلها وأرسل إشعاراً"*
 
 ### جدولة مواقع التواصل
+- ربط حسابات المنصات عبر OAuth (قراءة وكتابة لكل مستخدم)
 - رفع مقاطع وصور وجدولتها بتاريخ ووقت محدد
 - دعم: YouTube · Instagram · Twitter/X · Facebook · TikTok · Snapchat
-- إضافة وصف، هاشتاقات، بيانات المنشور
+- جدولة حتى 10 منشورات دفعة واحدة على عدة منصات
+- تعديل وحذف المنشورات المجدولة
 - نشر تلقائي كل دقيقة عبر Scheduler
+- تصفية المنشورات حسب المنصة والحالة (مجدول / نُشر / فشل)
 
 ### التكاملات
 - Twilio SMS
@@ -226,7 +229,7 @@ POST /api/ai/nlp
 ### Social Media
 ```
 GET    /api/social/accounts
-POST   /api/social/accounts
+GET    /api/social/accounts/:platform/auth-url   # OAuth URL للربط
 DELETE /api/social/accounts/:id
 GET    /api/social/posts
 POST   /api/social/posts
@@ -235,6 +238,14 @@ PUT    /api/social/posts/:id
 DELETE /api/social/posts/:id
 POST   /api/social/upload
 GET    /api/social/stats
+
+# OAuth Callbacks (بدون مصادقة)
+GET    /api/social/auth/twitter/callback
+GET    /api/social/auth/youtube/callback
+GET    /api/social/auth/facebook/callback
+GET    /api/social/auth/instagram/callback
+GET    /api/social/auth/tiktok/callback
+GET    /api/social/auth/snapchat/callback
 ```
 
 ### Billing
@@ -277,4 +288,28 @@ GET  /api/billing/transactions
 
 **Frontend:** React 18 · Vite · Tailwind CSS · React Router · Recharts · Lucide Icons
 
-**Infrastructure:** Docker · Nginx · Supabase
+**Infrastructure:** Docker · Nginx · Supabase · Vercel · Railway
+
+---
+
+## OAuth Redirect URIs (للضبط في كل منصة)
+
+| المنصة | Redirect URI |
+|--------|-------------|
+| Twitter/X | `https://rpa-now-production.up.railway.app/api/social/auth/twitter/callback` |
+| YouTube | `https://rpa-now-production.up.railway.app/api/social/accounts/youtube/callback` |
+| Facebook | `https://rpa-now-production.up.railway.app/api/social/accounts/facebook/callback` |
+| Instagram | `https://rpa-now-production.up.railway.app/api/social/accounts/instagram/callback` |
+| TikTok | `https://rpa-now-production.up.railway.app/api/social/accounts/tiktok/callback` |
+| Snapchat | `https://rpa-now-production.up.railway.app/api/social/accounts/snapchat/callback` |
+
+---
+
+## التغييرات الأخيرة
+
+- **OAuth كامل** لجميع المنصات الستة (قراءة + كتابة)
+- **تعديل المنشورات** المجدولة (عنوان، وصف، هاشتاقات، وقت)
+- **إصلاح timezone** — إرسال الوقت بتنسيق ISO مع المنطقة الزمنية
+- **إصلاح hashtags** — معالجة FormData بشكل صحيح
+- **CORS** — السماح لـ Vercel بالتواصل مع Railway
+- **SPA routing** — دعم React Router على Vercel
