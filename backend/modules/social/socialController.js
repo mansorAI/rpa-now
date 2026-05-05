@@ -88,6 +88,11 @@ const getPosts = async (req, res, next) => {
   } catch (err) { next(err); }
 };
 
+const parseArr = (val) => {
+  if (Array.isArray(val)) return val;
+  try { const p = JSON.parse(val); return Array.isArray(p) ? p : []; } catch { return []; }
+};
+
 const createPost = async (req, res, next) => {
   try {
     const { social_account_id, platform, post_type, title, description, hashtags, scheduled_at, metadata } = req.body;
@@ -102,7 +107,7 @@ const createPost = async (req, res, next) => {
        (id, workspace_id, social_account_id, platform, post_type, title, description, hashtags, media_url, media_path, scheduled_at, metadata, created_by)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) RETURNING *`,
       [id, req.workspace.id, social_account_id, platform, post_type || 'video',
-        title, description, hashtags || [],
+        title, description, parseArr(hashtags),
         media_url, media_path,
         new Date(scheduled_at),
         JSON.stringify(metadata || {}),
