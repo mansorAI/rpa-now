@@ -85,14 +85,18 @@ const postTweet = async ({ credentials, text, description, hashtags = [], mediaP
   if (oauth2Client) {
     try {
       return await tweetWithClient(oauth2Client, fullText, mediaPath);
-    } catch (err) {
-      if (err.code !== 401) throw err;
-      // 401 → fall through to OAuth 1.0a
+    } catch {
+      // OAuth 2.0 failed for any reason → fall through to OAuth 1.0a
     }
   }
 
-  // OAuth 1.0a — use stored tokens or env vars
-  const v1Client = getClient(creds);
+  // OAuth 1.0a — always use env vars as reliable fallback
+  const v1Client = new TwitterApi({
+    appKey: process.env.TWITTER_API_KEY,
+    appSecret: process.env.TWITTER_API_SECRET,
+    accessToken: process.env.TWITTER_ACCESS_TOKEN,
+    accessSecret: process.env.TWITTER_ACCESS_TOKEN_SECRET,
+  });
   return await tweetWithClient(v1Client, fullText, mediaPath);
 };
 
