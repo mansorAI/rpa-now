@@ -307,6 +307,11 @@ GET  /api/billing/transactions
 
 ## التغييرات الأخيرة
 
+- **TikTok API** — إنشاء تطبيق TikTok Developer وربط Login Kit + Content Posting API
+- **صفحة Privacy Policy** — `https://rpa-now.vercel.app/privacy`
+- **صفحة Terms of Service** — `https://rpa-now.vercel.app/terms`
+- **روابط السياسات** — مضافة في صفحة تسجيل الدخول
+- **TikTok App Review** — تم التقديم للمراجعة (قيد الانتظار)
 - **OAuth كامل** لجميع المنصات الستة (قراءة + كتابة)
 - **تعديل المنشورات** المجدولة (عنوان، وصف، هاشتاقات، وقت)
 - **إعادة محاولة** المنشورات الفاشلة بضغطة زر
@@ -317,3 +322,17 @@ GET  /api/billing/transactions
 - **إصلاح trust proxy** — rate limiter يعمل بشكل صحيح على Railway
 - **CORS** — السماح لـ Vercel بالتواصل مع Railway
 - **SPA routing** — دعم React Router على Vercel
+
+---
+
+## TikTok Integration Status
+
+| العنصر | الحالة |
+|--------|--------|
+| App Created | ✅ |
+| Login Kit | ✅ مضاف |
+| Content Posting API | ✅ مضاف |
+| Redirect URI | ✅ `https://rpa-now-production.up.railway.app/api/social/accounts/tiktok/callback` |
+| Domain Verified | ✅ `https://rpa-now.vercel.app/` |
+| App Review | ⏳ قيد المراجعة |
+| Client Key in Railway | ✅ |
