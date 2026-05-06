@@ -10,6 +10,8 @@ import Integrations from './pages/Integrations';
 import Subscription from './pages/Subscription';
 import Logs from './pages/Logs';
 import SocialScheduler from './pages/SocialScheduler';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import TermsOfService from './pages/TermsOfService';
 
 const PrivateRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -44,6 +46,8 @@ export default function App() {
           <Route path="logs" element={<Logs />} />
           <Route path="social" element={<SocialScheduler />} />
         </Route>
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/terms" element={<TermsOfService />} />
         <Route path="*" element={<Navigate to="/dashboard" />} />
       </Routes>
     </AuthProvider>
