@@ -1,6 +1,6 @@
 # منصة الأتمتة الذكية — RPA Now
 
-منصة SaaS عربية متكاملة لأتمتة الأعمال بالذكاء الاصطناعي، مع نظام جدولة محتوى مواقع التواصل الاجتماعي.
+منصة SaaS عربية متكاملة لأتمتة الأعمال بالذكاء الاصطناعي، مع جدولة مواقع التواصل الاجتماعي وبوتات المحادثة الذكية.
 
 ## الروابط المباشرة
 
@@ -35,6 +35,15 @@
 - نشر تلقائي كل دقيقة عبر Scheduler
 - تصفية المنشورات حسب المنصة والحالة (مجدول / نُشر / فشل)
 
+### بوت المحادثات (ChatBots)
+- إنشاء بوتات ذكية لخدمة العملاء بالذكاء الاصطناعي (Claude)
+- رفع ملفات قاعدة المعرفة: Excel · CSV · PDF · TXT
+- بحث RAG: PostgreSQL full-text search + ILIKE fallback
+- أنواع أعمال: قطع غيار · عيادة · مطعم · عقارات · عام
+- محادثات متعددة مع تسجيل كامل للرسائل
+- API عام بدون مصادقة لدمج البوت في أي موقع
+- واجهة اختبار مباشر داخل لوحة التحكم
+
 ### التكاملات
 - Twilio SMS
 - WhatsApp Cloud API
@@ -58,14 +67,26 @@ RPA/
 │   ├── database/
 │   │   ├── schema.sql               # جداول المشروع الأساسية
 │   │   ├── social_schema.sql        # جداول مواقع التواصل
+│   │   ├── rpa_schema.sql           # جداول RPA Business
+│   │   ├── chatbot_schema.sql       # جداول بوت المحادثات
 │   │   └── migrate.js               # تشغيل الهجرة
 │   └── modules/
 │       ├── auth/                    # JWT + صلاحيات + multi-tenant
 │       ├── automation/              # محرك الأتمتة + CRUD
-│       ├── ai/                      # OpenAI: تحليل + بناء + NLP
+│       ├── ai/                      # Claude: تحليل + بناء + NLP
 │       ├── billing/                 # Stripe: اشتراكات + فوترة
 │       ├── integrations/            # Twilio · WhatsApp · Gmail
 │       ├── notifications/           # إشعارات داخلية
+│       ├── rpa/                     # RPA Business
+│       │   ├── workflowEngine.js    # محرك تنفيذ سير العمل
+│       │   ├── aiBuilder.js         # بناء أتمتة من نص عربي
+│       │   ├── rpaController.js     # CRUD + analytics
+│       │   └── rpaRoutes.js         # مسارات /api/rpa/*
+│       ├── chatbot/                 # بوت المحادثات
+│       │   ├── chatbotEngine.js     # RAG + Claude AI
+│       │   ├── fileProcessor.js     # تحليل Excel/CSV/PDF/TXT
+│       │   ├── chatbotController.js # CRUD + محادثات
+│       │   └── chatbotRoutes.js     # مسارات /api/chatbots/*
 │       └── social/
 │           ├── platforms/           # YouTube · Twitter · Facebook · Instagram · TikTok · Snapchat
 │           ├── scheduler.js         # جدولة تلقائية كل دقيقة
@@ -77,12 +98,14 @@ RPA/
 │       │   ├── AutomationBuilder.jsx # بناء أتمتة بالأزرار أو AI
 │       │   ├── Automations.jsx      # قائمة الأتمتات
 │       │   ├── SocialScheduler.jsx  # جدولة مواقع التواصل
+│       │   ├── RPABusiness.jsx      # RPA Business (7 تبويبات + بوت)
 │       │   ├── Integrations.jsx     # ربط الخدمات
 │       │   ├── Subscription.jsx     # خطط الاشتراك
 │       │   └── Logs.jsx             # سجلات التشغيل
 │       └── components/
 │           ├── Sidebar.jsx
 │           ├── Header.jsx
+│           ├── ChatBotsTab.jsx      # واجهة بوت المحادثات
 │           └── Layout.jsx
 ├── docker-compose.yml
 └── start.ps1
@@ -106,6 +129,15 @@ RPA/
 | `social_accounts` | حسابات مواقع التواصل |
 | `social_posts` | المنشورات المجدولة |
 | `social_media_files` | الملفات المرفوعة |
+| `rpa_workflows` | سير عمل RPA Business |
+| `rpa_executions` | سجلات تنفيذ سير العمل |
+| `rpa_execution_steps` | خطوات كل تنفيذ |
+| `rpa_templates` | قوالب جاهزة |
+| `rpa_ai_suggestions` | اقتراحات الذكاء الاصطناعي |
+| `chatbots` | بوتات المحادثة |
+| `chatbot_knowledge` | قاعدة معرفة كل بوت (chunks) |
+| `chatbot_conversations` | محادثات العملاء |
+| `chatbot_messages` | رسائل كل محادثة |
 
 ---
 
@@ -174,14 +206,16 @@ cd frontend && npm run dev
 |---------|-------|
 | `DATABASE_URL` | رابط اتصال PostgreSQL |
 | `JWT_SECRET` | مفتاح تشفير JWT |
-| `OPENAI_API_KEY` | مفتاح OpenAI |
+| `ANTHROPIC_API_KEY` | مفتاح Claude AI (Anthropic) |
 | `TWILIO_*` | بيانات Twilio SMS |
 | `WHATSAPP_*` | بيانات WhatsApp Cloud API |
 | `STRIPE_*` | بيانات Stripe |
 | `YOUTUBE_*` | بيانات YouTube Data API |
 | `TWITTER_*` | بيانات Twitter API v2 |
 | `FACEBOOK_*` | بيانات Meta Graph API |
-| `TIKTOK_*` | بيانات TikTok API |
+| `TIKTOK_CLIENT_KEY` | مفتاح TikTok API |
+| `TIKTOK_CLIENT_SECRET` | سر TikTok API |
+| `TIKTOK_REDIRECT_URI` | رابط callback لـ TikTok |
 
 ---
 
@@ -224,6 +258,45 @@ POST /api/ai/analyze
 POST /api/ai/build-automation
 POST /api/ai/suggest
 POST /api/ai/nlp
+```
+
+### RPA Business
+```
+GET    /api/rpa/workflows
+POST   /api/rpa/workflows
+PUT    /api/rpa/workflows/:id
+DELETE /api/rpa/workflows/:id
+POST   /api/rpa/workflows/:id/run
+GET    /api/rpa/executions
+GET    /api/rpa/executions/:id
+GET    /api/rpa/templates
+POST   /api/rpa/templates/:id/use
+GET    /api/rpa/ai/suggestions
+PUT    /api/rpa/ai/suggestions/:id
+POST   /api/rpa/ai/generate
+GET    /api/rpa/analytics
+```
+
+### ChatBots (بوت المحادثات)
+```
+GET    /api/chatbots                         # قائمة البوتات
+POST   /api/chatbots                         # إنشاء بوت
+PUT    /api/chatbots/:id                     # تعديل بوت
+DELETE /api/chatbots/:id                     # حذف بوت
+GET    /api/chatbots/stats                   # إحصائيات
+
+POST   /api/chatbots/knowledge/upload        # رفع ملف (Excel/CSV/PDF/TXT)
+POST   /api/chatbots/knowledge/manual        # إضافة نص يدوي
+GET    /api/chatbots/:id/knowledge           # قاعدة المعرفة
+DELETE /api/chatbots/:id/knowledge           # حذف مصدر
+
+GET    /api/chatbots/:id/conversations       # المحادثات
+GET    /api/chatbots/conversations/:convId/messages  # رسائل محادثة
+
+POST   /api/chatbots/conversations/start     # بدء محادثة
+POST   /api/chatbots/conversations/:convId/message  # إرسال رسالة
+
+POST   /api/chatbots/public/:botId           # ⚡ بدون مصادقة — للدمج الخارجي
 ```
 
 ### Social Media
@@ -284,7 +357,7 @@ GET  /api/billing/transactions
 
 ## التقنيات المستخدمة
 
-**Backend:** Node.js · Express · PostgreSQL · JWT · OpenAI · Stripe · Twilio · node-cron · multer
+**Backend:** Node.js · Express · PostgreSQL · JWT · Anthropic (Claude) · Stripe · Twilio · node-cron · multer · xlsx · pdf-parse
 
 **Frontend:** React 18 · Vite · Tailwind CSS · React Router · Recharts · Lucide Icons
 
@@ -307,21 +380,16 @@ GET  /api/billing/transactions
 
 ## التغييرات الأخيرة
 
+- **بوت المحادثات** — وحدة كاملة لبناء بوتات خدمة العملاء بالذكاء الاصطناعي (RAG + Claude)
+- **RPA Business** — وحدة أتمتة متكاملة مع 8 تبويبات ومحرك تنفيذ + AI builder
+- **Anthropic Claude** — استبدال OpenAI بـ Claude (Haiku) في جميع وظائف الذكاء الاصطناعي
 - **TikTok API** — إنشاء تطبيق TikTok Developer وربط Login Kit + Content Posting API
 - **صفحة Privacy Policy** — `https://rpa-now.vercel.app/privacy`
 - **صفحة Terms of Service** — `https://rpa-now.vercel.app/terms`
 - **روابط السياسات** — مضافة في صفحة تسجيل الدخول
 - **TikTok App Review** — تم التقديم للمراجعة (قيد الانتظار)
 - **OAuth كامل** لجميع المنصات الستة (قراءة + كتابة)
-- **تعديل المنشورات** المجدولة (عنوان، وصف، هاشتاقات، وقت)
-- **إعادة محاولة** المنشورات الفاشلة بضغطة زر
-- **عرض رسالة الخطأ** على كل منشور فاشل
 - **إصلاح Twitter 401** — fallback تلقائي من OAuth 2.0 إلى OAuth 1.0a
-- **إصلاح timezone** — إرسال الوقت بتنسيق ISO مع المنطقة الزمنية
-- **إصلاح hashtags** — معالجة FormData بشكل صحيح
-- **إصلاح trust proxy** — rate limiter يعمل بشكل صحيح على Railway
-- **CORS** — السماح لـ Vercel بالتواصل مع Railway
-- **SPA routing** — دعم React Router على Vercel
 
 ---
 
