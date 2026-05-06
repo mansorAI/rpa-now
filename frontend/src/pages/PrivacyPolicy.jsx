@@ -2,14 +2,14 @@ export default function PrivacyPolicy() {
   return (
     <div className="min-h-screen bg-gray-950 text-gray-200 py-16 px-6">
       <div className="max-w-3xl mx-auto">
-        <h1 className="text-3xl font-bold text-white mb-2">Privacy Policy</h1>
+        <h1 className="text-3xl font-bold text-white mb-2">Privacy Policy — RPA Now</h1>
         <p className="text-gray-400 mb-10">Last updated: May 2025</p>
 
         <section className="mb-8">
           <h2 className="text-xl font-semibold text-white mb-3">1. Information We Collect</h2>
           <p className="text-gray-300 leading-relaxed">
-            We collect information you provide directly, such as account credentials, social media
-            access tokens (OAuth), and content you schedule for publishing. We do not store your
+            RPA Now collects information you provide directly, such as account credentials, social media
+            access tokens (OAuth), and content you schedule for publishing. RPA Now does not store your
             social media passwords.
           </p>
         </section>

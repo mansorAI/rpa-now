@@ -78,6 +78,11 @@ export default function Login() {
             ليس لديك حساب؟{' '}
             <Link to="/register" className="text-primary-400 hover:underline">إنشاء حساب</Link>
           </p>
+          <p className="text-center text-xs text-slate-500 mt-4">
+            <Link to="/terms" className="hover:underline">Terms of Service</Link>
+            {' · '}
+            <Link to="/privacy" className="hover:underline">Privacy Policy</Link>
+          </p>
         </div>
       </div>
     </div>
