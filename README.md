@@ -309,7 +309,11 @@ GET  /api/billing/transactions
 
 - **OAuth كامل** لجميع المنصات الستة (قراءة + كتابة)
 - **تعديل المنشورات** المجدولة (عنوان، وصف، هاشتاقات، وقت)
+- **إعادة محاولة** المنشورات الفاشلة بضغطة زر
+- **عرض رسالة الخطأ** على كل منشور فاشل
+- **إصلاح Twitter 401** — fallback تلقائي من OAuth 2.0 إلى OAuth 1.0a
 - **إصلاح timezone** — إرسال الوقت بتنسيق ISO مع المنطقة الزمنية
 - **إصلاح hashtags** — معالجة FormData بشكل صحيح
+- **إصلاح trust proxy** — rate limiter يعمل بشكل صحيح على Railway
 - **CORS** — السماح لـ Vercel بالتواصل مع Railway
 - **SPA routing** — دعم React Router على Vercel
