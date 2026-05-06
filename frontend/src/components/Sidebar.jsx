@@ -1,16 +1,17 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import {
-  LayoutDashboard, Zap, Plug, CreditCard, FileText, LogOut, Bot, CalendarClock,
+  LayoutDashboard, Zap, Plug, CreditCard, FileText, LogOut, Bot, CalendarClock, Cpu,
 } from 'lucide-react';
 
 const nav = [
   { to: '/dashboard',     icon: LayoutDashboard, label: 'لوحة التحكم' },
-  { to: '/automations',   icon: Zap,              label: 'الأتمتات' },
-  { to: '/social',        icon: CalendarClock,    label: 'جدولة المنشورات' },
-  { to: '/integrations',  icon: Plug,             label: 'التكاملات' },
-  { to: '/logs',          icon: FileText,         label: 'السجلات' },
-  { to: '/subscription',  icon: CreditCard,       label: 'الاشتراك' },
+  { to: '/rpa-business',  icon: Cpu,             label: 'RPA Business', highlight: true },
+  { to: '/automations',   icon: Zap,             label: 'الأتمتات' },
+  { to: '/social',        icon: CalendarClock,   label: 'جدولة المنشورات' },
+  { to: '/integrations',  icon: Plug,            label: 'التكاملات' },
+  { to: '/logs',          icon: FileText,        label: 'السجلات' },
+  { to: '/subscription',  icon: CreditCard,      label: 'الاشتراك' },
 ];
 
 export default function Sidebar() {
@@ -36,20 +37,25 @@ export default function Sidebar() {
 
       {/* Navigation */}
       <nav className="flex-1 p-4 space-y-1">
-        {nav.map(({ to, icon: Icon, label }) => (
+        {nav.map(({ to, icon: Icon, label, highlight }) => (
           <NavLink
             key={to}
             to={to}
             className={({ isActive }) =>
               `flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all ${
                 isActive
-                  ? 'bg-primary-600/10 text-primary-400 border border-primary-500/20'
-                  : 'text-slate-400 hover:text-white hover:bg-dark-700'
+                  ? highlight
+                    ? 'bg-violet-600/20 text-violet-400 border border-violet-500/30'
+                    : 'bg-primary-600/10 text-primary-400 border border-primary-500/20'
+                  : highlight
+                    ? 'text-violet-300 hover:text-white hover:bg-violet-600/10'
+                    : 'text-slate-400 hover:text-white hover:bg-dark-700'
               }`
             }
           >
             <Icon className="w-5 h-5" />
             {label}
+            {highlight && <span className="mr-auto text-xs bg-violet-600/30 text-violet-300 px-1.5 py-0.5 rounded-full">AI</span>}
           </NavLink>
         ))}
       </nav>
