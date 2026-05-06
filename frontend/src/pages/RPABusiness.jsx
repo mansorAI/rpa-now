@@ -4,13 +4,13 @@ import api from '../lib/api';
 import toast from 'react-hot-toast';
 
 const TABS = [
-  { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
-  { id: 'ai-builder', label: 'AI Builder', icon: Sparkles },
-  { id: 'workflows', label: 'Workflows', icon: Cpu },
-  { id: 'active-runs', label: 'Active Runs', icon: Play },
-  { id: 'templates', label: 'Templates', icon: FileText },
-  { id: 'suggestions', label: 'AI Suggestions', icon: Zap },
-  { id: 'logs', label: 'Logs', icon: Clock },
+  { id: 'dashboard', label: 'لوحة التحكم', icon: BarChart3 },
+  { id: 'ai-builder', label: 'بناء بالذكاء الاصطناعي', icon: Sparkles },
+  { id: 'workflows', label: 'سير العمل', icon: Cpu },
+  { id: 'active-runs', label: 'التشغيل المباشر', icon: Play },
+  { id: 'templates', label: 'القوالب', icon: FileText },
+  { id: 'suggestions', label: 'اقتراحات الذكاء الاصطناعي', icon: Zap },
+  { id: 'logs', label: 'السجلات', icon: Clock },
 ];
 
 const NODE_COLORS = {
@@ -141,7 +141,7 @@ export default function RPABusiness() {
         </div>
         <div>
           <h1 className="text-xl font-bold text-white">RPA Business</h1>
-          <p className="text-xs text-slate-400">AI-Powered Process Automation</p>
+          <p className="text-xs text-slate-400">أتمتة العمليات التجارية بالذكاء الاصطناعي</p>
         </div>
       </div>
 
