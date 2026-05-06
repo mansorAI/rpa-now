@@ -13,6 +13,9 @@ const TABS = [
   { id: 'logs', label: 'السجلات', icon: Clock },
 ];
 
+const STATUS_AR = { active: 'نشط', paused: 'موقوف', draft: 'مسودة', archived: 'مؤرشف' };
+const TRIGGER_AR = { manual: 'يدوي', schedule: 'مجدول', webhook: 'ويب هوك', event: 'حدث', ai: 'ذكاء اصطناعي' };
+
 const NODE_COLORS = {
   trigger: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
   condition: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
@@ -67,7 +70,7 @@ export default function RPABusiness() {
   async function runWorkflow(id) {
     try {
       await api.post(`/rpa/workflows/${id}/run`, {});
-      toast.success('Workflow started!');
+      toast.success('تم تشغيل سير العمل!');
       loadTab('active-runs');
       setTab('active-runs');
     } catch {}
@@ -80,18 +83,18 @@ export default function RPABusiness() {
   }
 
   async function deleteWorkflow(id) {
-    if (!confirm('Delete this workflow?')) return;
+    if (!confirm('هل تريد حذف سير العمل هذا؟')) return;
     await api.delete(`/rpa/workflows/${id}`);
     loadTab('workflows');
-    toast.success('Deleted');
+    toast.success('تم الحذف');
   }
 
   async function buildWithAI() {
-    if (!aiText.trim()) return toast.error('Describe your workflow first');
+    if (!aiText.trim()) return toast.error('اكتب وصف سير العمل أولاً');
     setAiBuilding(true);
     try {
       const r = await api.post('/rpa/ai/generate', { description: aiText });
-      toast.success(`Workflow "${r.data.name}" created!`);
+      toast.success(`تم إنشاء "${r.data.name}" بنجاح!`);
       setAiText('');
       setTab('workflows');
     } catch {}
@@ -101,7 +104,7 @@ export default function RPABusiness() {
   async function useTemplate(id) {
     try {
       const r = await api.post(`/rpa/templates/${id}/use`);
-      toast.success(`Workflow "${r.data.name}" created from template!`);
+      toast.success(`تم إنشاء "${r.data.name}" من القالب!`);
       setTab('workflows');
     } catch {}
   }
@@ -133,7 +136,7 @@ export default function RPABusiness() {
   };
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col" dir="rtl">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
         <div className="w-10 h-10 bg-gradient-to-br from-violet-600 to-purple-700 rounded-xl flex items-center justify-center">
@@ -167,15 +170,15 @@ export default function RPABusiness() {
       ) : (
         <div className="flex-1 overflow-y-auto">
 
-          {/* ── DASHBOARD ── */}
+          {/* ── لوحة التحكم ── */}
           {tab === 'dashboard' && analytics && (
             <div className="space-y-6">
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 {[
-                  { label: 'Total Workflows', value: analytics.total_workflows, icon: Cpu, color: 'text-violet-400' },
-                  { label: 'Total Runs', value: analytics.total_runs, icon: Play, color: 'text-blue-400' },
-                  { label: 'Success Rate', value: `${analytics.success_rate}%`, icon: TrendingUp, color: 'text-green-400' },
-                  { label: 'Hours Saved', value: analytics.time_saved_hours, icon: Timer, color: 'text-yellow-400' },
+                  { label: 'إجمالي سير العمل', value: analytics.total_workflows, icon: Cpu, color: 'text-violet-400' },
+                  { label: 'إجمالي التشغيلات', value: analytics.total_runs, icon: Play, color: 'text-blue-400' },
+                  { label: 'معدل النجاح', value: `${analytics.success_rate}%`, icon: TrendingUp, color: 'text-green-400' },
+                  { label: 'ساعات موفّرة', value: analytics.time_saved_hours, icon: Timer, color: 'text-yellow-400' },
                 ].map(c => {
                   const Icon = c.icon;
                   return (
@@ -190,7 +193,7 @@ export default function RPABusiness() {
 
               {analytics.top_workflows?.length > 0 && (
                 <div className="card p-4">
-                  <h3 className="text-sm font-semibold text-white mb-3">Top Workflows</h3>
+                  <h3 className="text-sm font-semibold text-white mb-3">أكثر سير العمل تشغيلاً</h3>
                   <div className="space-y-2">
                     {analytics.top_workflows.map(w => (
                       <div key={w.name} className="flex items-center justify-between text-sm">
@@ -198,7 +201,7 @@ export default function RPABusiness() {
                         <div className="flex items-center gap-3 text-xs text-slate-500">
                           <span className="text-green-400">{w.success_count} ✓</span>
                           <span className="text-red-400">{w.fail_count} ✗</span>
-                          <span>{w.run_count} runs</span>
+                          <span>{w.run_count} تشغيل</span>
                         </div>
                       </div>
                     ))}
@@ -207,7 +210,7 @@ export default function RPABusiness() {
               )}
 
               <div className="card p-4">
-                <h3 className="text-sm font-semibold text-white mb-3">Recent Workflows</h3>
+                <h3 className="text-sm font-semibold text-white mb-3">سير العمل الأخيرة</h3>
                 <div className="space-y-2">
                   {workflows.slice(0, 5).map(w => (
                     <div key={w.id} className="flex items-center justify-between">
@@ -217,7 +220,7 @@ export default function RPABusiness() {
                           ${w.status === 'active' ? 'bg-green-500/20 text-green-400' :
                             w.status === 'paused' ? 'bg-yellow-500/20 text-yellow-400' :
                             'bg-gray-500/20 text-gray-400'}`}>
-                          {w.status}
+                          {STATUS_AR[w.status] || w.status}
                         </span>
                         <button onClick={() => runWorkflow(w.id)}
                           className="p-1 hover:text-violet-400 text-slate-500">
@@ -231,43 +234,44 @@ export default function RPABusiness() {
             </div>
           )}
 
-          {/* ── AI BUILDER ── */}
+          {/* ── بناء بالذكاء الاصطناعي ── */}
           {tab === 'ai-builder' && (
             <div className="space-y-6">
               <div className="card p-6">
                 <div className="flex items-center gap-2 mb-4">
                   <Sparkles className="w-5 h-5 text-violet-400" />
-                  <h2 className="text-base font-semibold text-white">AI Workflow Generator</h2>
+                  <h2 className="text-base font-semibold text-white">منشئ سير العمل بالذكاء الاصطناعي</h2>
                 </div>
                 <p className="text-sm text-slate-400 mb-4">
-                  Describe your business process in plain language and AI will build the workflow automatically.
+                  صف عمليتك التجارية بلغة عربية بسيطة وسيقوم الذكاء الاصطناعي ببناء سير العمل تلقائياً.
                 </p>
                 <textarea
                   value={aiText}
                   onChange={e => setAiText(e.target.value)}
                   rows={5}
-                  placeholder="Example: When an employee submits a leave request, check if they have enough balance, if yes approve it and send notification, otherwise reject and notify HR manager..."
+                  placeholder="مثال: عندما يرسل موظف طلب إجازة، تحقق من رصيده، إذا كان كافياً وافق وأرسل إشعاراً، وإلا ارفض وأبلغ مدير الموارد البشرية..."
                   className="input w-full resize-none mb-4"
+                  dir="rtl"
                 />
                 <button onClick={buildWithAI} disabled={aiBuilding}
                   className="btn-primary flex items-center gap-2">
                   {aiBuilding ? <Loader className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-                  {aiBuilding ? 'Building Workflow...' : 'Build with AI'}
+                  {aiBuilding ? 'جارٍ البناء...' : 'بناء بالذكاء الاصطناعي'}
                 </button>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {[
-                  { title: 'Invoice Approval', desc: 'Auto-approve invoices under threshold, escalate others' },
-                  { title: 'Employee Onboarding', desc: 'Automate new hire setup: accounts, notifications, tasks' },
-                  { title: 'Report Generation', desc: 'Schedule weekly reports and distribute to managers' },
+                  { title: 'اعتماد الفواتير', desc: 'اعتماد الفواتير تلقائياً دون الحد، وتصعيد ما فوقه' },
+                  { title: 'تأهيل الموظفين', desc: 'أتمتة إعداد الموظف الجديد: حسابات، إشعارات، مهام' },
+                  { title: 'إنشاء التقارير', desc: 'جدولة تقارير أسبوعية وتوزيعها على المدراء' },
                 ].map(ex => (
                   <button key={ex.title} onClick={() => setAiText(ex.desc)}
-                    className="card p-4 text-left hover:border-violet-500/50 transition-colors">
+                    className="card p-4 text-right hover:border-violet-500/50 transition-colors">
                     <div className="text-sm font-medium text-white mb-1">{ex.title}</div>
                     <div className="text-xs text-slate-400">{ex.desc}</div>
                     <div className="flex items-center gap-1 mt-2 text-xs text-violet-400">
-                      Use as prompt <ChevronRight className="w-3 h-3" />
+                      استخدم كنص <ChevronRight className="w-3 h-3 rotate-180" />
                     </div>
                   </button>
                 ))}
@@ -275,19 +279,19 @@ export default function RPABusiness() {
             </div>
           )}
 
-          {/* ── WORKFLOWS ── */}
+          {/* ── سير العمل ── */}
           {tab === 'workflows' && (
             <div className="space-y-3">
               <div className="flex justify-between items-center">
-                <span className="text-sm text-slate-400">{workflows.length} workflows</span>
+                <span className="text-sm text-slate-400">{workflows.length} سير عمل</span>
                 <button onClick={() => setTab('ai-builder')} className="btn-primary flex items-center gap-2 text-sm">
-                  <Plus className="w-4 h-4" /> New Workflow
+                  <Plus className="w-4 h-4" /> إنشاء جديد
                 </button>
               </div>
               {workflows.length === 0 ? (
                 <div className="card p-12 text-center">
                   <Cpu className="w-10 h-10 text-slate-600 mx-auto mb-3" />
-                  <p className="text-slate-400">No workflows yet. Create one with AI Builder.</p>
+                  <p className="text-slate-400">لا يوجد سير عمل بعد. أنشئ واحداً باستخدام الذكاء الاصطناعي.</p>
                 </div>
               ) : workflows.map(w => (
                 <div key={w.id} className="card p-4">
@@ -296,29 +300,29 @@ export default function RPABusiness() {
                       <div className="flex items-center gap-2 mb-1">
                         <h3 className="font-medium text-white truncate">{w.name}</h3>
                         {w.ai_generated && (
-                          <span className="text-xs bg-violet-500/20 text-violet-400 px-1.5 py-0.5 rounded-full">AI</span>
+                          <span className="text-xs bg-violet-500/20 text-violet-400 px-1.5 py-0.5 rounded-full">ذكاء اصطناعي</span>
                         )}
                       </div>
                       <p className="text-xs text-slate-400 mb-2 truncate">{w.description}</p>
                       <div className="flex items-center gap-3 text-xs text-slate-500">
-                        <span>{w.run_count} runs</span>
+                        <span>{w.run_count} تشغيل</span>
                         <span className="text-green-400">{w.success_count} ✓</span>
                         <span className="text-red-400">{w.fail_count} ✗</span>
-                        <span>{w.nodes?.length || 0} steps</span>
+                        <span>{w.nodes?.length || 0} خطوة</span>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 ml-3">
+                    <div className="flex items-center gap-2 mr-3">
                       <span className={`text-xs px-2 py-0.5 rounded-full
                         ${w.status === 'active' ? 'bg-green-500/20 text-green-400' :
                           w.status === 'paused' ? 'bg-yellow-500/20 text-yellow-400' :
                           'bg-gray-500/20 text-gray-400'}`}>
-                        {w.status}
+                        {STATUS_AR[w.status] || w.status}
                       </span>
-                      <button onClick={() => runWorkflow(w.id)} title="Run"
+                      <button onClick={() => runWorkflow(w.id)} title="تشغيل"
                         className="p-1.5 rounded-lg hover:bg-violet-500/20 text-slate-400 hover:text-violet-400">
                         <Play className="w-4 h-4" />
                       </button>
-                      <button onClick={() => toggleStatus(w)} title="Toggle"
+                      <button onClick={() => toggleStatus(w)} title="تبديل الحالة"
                         className="p-1.5 rounded-lg hover:bg-slate-700 text-slate-400 hover:text-white">
                         {w.status === 'active' ? '⏸' : '▶'}
                       </button>
@@ -342,13 +346,13 @@ export default function RPABusiness() {
             </div>
           )}
 
-          {/* ── ACTIVE RUNS ── */}
+          {/* ── التشغيل المباشر ── */}
           {tab === 'active-runs' && (
             <div className="space-y-3">
               {executions.length === 0 ? (
                 <div className="card p-12 text-center">
                   <Play className="w-10 h-10 text-slate-600 mx-auto mb-3" />
-                  <p className="text-slate-400">No active runs at the moment.</p>
+                  <p className="text-slate-400">لا توجد تشغيلات نشطة حالياً.</p>
                 </div>
               ) : executions.map(e => (
                 <div key={e.id} className="card p-4 cursor-pointer hover:border-violet-500/30"
@@ -359,12 +363,12 @@ export default function RPABusiness() {
                       <span className="text-sm font-medium text-white">{e.workflow_name}</span>
                     </div>
                     <span className="text-xs text-slate-500">
-                      {new Date(e.started_at).toLocaleTimeString()}
+                      {new Date(e.started_at).toLocaleTimeString('ar-SA')}
                     </span>
                   </div>
                   <div className="flex items-center gap-3 text-xs text-slate-500">
-                    <span>Triggered: {e.triggered_by}</span>
-                    {e.duration_ms && <span>{(e.duration_ms / 1000).toFixed(1)}s</span>}
+                    <span>المشغِّل: {TRIGGER_AR[e.triggered_by] || e.triggered_by}</span>
+                    {e.duration_ms && <span>{(e.duration_ms / 1000).toFixed(1)} ثانية</span>}
                   </div>
                   {e.error_message && (
                     <div className="mt-2 text-xs text-red-400 bg-red-500/10 rounded p-2">{e.error_message}</div>
@@ -382,7 +386,7 @@ export default function RPABusiness() {
                   onClick={() => setSelectedExecution(null)}>
                   <div className="bg-dark-800 rounded-2xl p-6 max-w-lg w-full max-h-[80vh] overflow-y-auto"
                     onClick={e => e.stopPropagation()}>
-                    <h3 className="font-semibold text-white mb-4">Execution Timeline</h3>
+                    <h3 className="font-semibold text-white mb-4">مراحل التنفيذ</h3>
                     <div className="space-y-2">
                       {selectedExecution.steps?.map(step => (
                         <div key={step.id} className="flex items-start gap-3">
@@ -390,10 +394,12 @@ export default function RPABusiness() {
                           <div className="flex-1">
                             <div className="flex justify-between text-sm">
                               <span className="text-white">{step.node_name}</span>
-                              <span className="text-xs text-slate-500">{step.actor}</span>
+                              <span className="text-xs text-slate-500">
+                                {step.actor === 'ai' ? 'ذكاء اصطناعي' : step.actor === 'user' ? 'مستخدم' : 'نظام'}
+                              </span>
                             </div>
                             {step.duration_ms && (
-                              <span className="text-xs text-slate-500">{step.duration_ms}ms</span>
+                              <span className="text-xs text-slate-500">{step.duration_ms} مللي ثانية</span>
                             )}
                             {step.error_message && (
                               <div className="text-xs text-red-400 mt-1">{step.error_message}</div>
@@ -403,20 +409,20 @@ export default function RPABusiness() {
                       ))}
                     </div>
                     <button onClick={() => setSelectedExecution(null)}
-                      className="btn-primary w-full mt-4 justify-center">Close</button>
+                      className="btn-primary w-full mt-4 justify-center">إغلاق</button>
                   </div>
                 </div>
               )}
             </div>
           )}
 
-          {/* ── TEMPLATES ── */}
+          {/* ── القوالب ── */}
           {tab === 'templates' && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {templates.length === 0 ? (
                 <div className="card p-12 text-center col-span-2">
                   <FileText className="w-10 h-10 text-slate-600 mx-auto mb-3" />
-                  <p className="text-slate-400">No templates available yet.</p>
+                  <p className="text-slate-400">لا توجد قوالب متاحة حالياً.</p>
                 </div>
               ) : templates.map(t => (
                 <div key={t.id} className="card p-4">
@@ -425,24 +431,24 @@ export default function RPABusiness() {
                       <h3 className="font-medium text-white">{t.name}</h3>
                       <span className="text-xs bg-slate-700 text-slate-400 px-2 py-0.5 rounded-full">{t.category}</span>
                     </div>
-                    <span className="text-xs text-slate-500">{t.use_count} uses</span>
+                    <span className="text-xs text-slate-500">{t.use_count} استخدام</span>
                   </div>
                   <p className="text-xs text-slate-400 mb-3">{t.description}</p>
                   <button onClick={() => useTemplate(t.id)} className="btn-primary text-sm w-full justify-center">
-                    Use Template
+                    استخدام القالب
                   </button>
                 </div>
               ))}
             </div>
           )}
 
-          {/* ── AI SUGGESTIONS ── */}
+          {/* ── اقتراحات الذكاء الاصطناعي ── */}
           {tab === 'suggestions' && (
             <div className="space-y-3">
               {suggestions.length === 0 ? (
                 <div className="card p-12 text-center">
                   <Zap className="w-10 h-10 text-slate-600 mx-auto mb-3" />
-                  <p className="text-slate-400 mb-3">No suggestions yet. Run some workflows first.</p>
+                  <p className="text-slate-400 mb-3">لا توجد اقتراحات بعد. شغّل بعض سير العمل أولاً.</p>
                 </div>
               ) : suggestions.map(s => (
                 <div key={s.id} className="card p-4">
@@ -454,11 +460,11 @@ export default function RPABusiness() {
                       <div className="flex gap-2">
                         <button onClick={() => acceptSuggestion(s)}
                           className="btn-primary text-xs py-1.5">
-                          Build Automation
+                          بناء الأتمتة
                         </button>
                         <button onClick={() => dismissSuggestion(s.id)}
                           className="text-xs text-slate-500 hover:text-slate-300 px-3 py-1.5 rounded-lg hover:bg-slate-700">
-                          Dismiss
+                          تجاهل
                         </button>
                       </div>
                     </div>
@@ -468,13 +474,13 @@ export default function RPABusiness() {
             </div>
           )}
 
-          {/* ── LOGS ── */}
+          {/* ── السجلات ── */}
           {tab === 'logs' && (
             <div className="space-y-2">
               {executions.length === 0 ? (
                 <div className="card p-12 text-center">
                   <Clock className="w-10 h-10 text-slate-600 mx-auto mb-3" />
-                  <p className="text-slate-400">No execution logs yet.</p>
+                  <p className="text-slate-400">لا توجد سجلات تنفيذ بعد.</p>
                 </div>
               ) : executions.map(e => (
                 <div key={e.id} className="card p-3 cursor-pointer hover:border-slate-600"
@@ -485,8 +491,8 @@ export default function RPABusiness() {
                       <span className="text-sm text-white">{e.workflow_name}</span>
                     </div>
                     <div className="flex items-center gap-3 text-xs text-slate-500">
-                      {e.duration_ms && <span>{(e.duration_ms / 1000).toFixed(1)}s</span>}
-                      <span>{new Date(e.started_at).toLocaleDateString()}</span>
+                      {e.duration_ms && <span>{(e.duration_ms / 1000).toFixed(1)} ث</span>}
+                      <span>{new Date(e.started_at).toLocaleDateString('ar-SA')}</span>
                     </div>
                   </div>
                 </div>
