@@ -60,7 +60,12 @@ const getOAuth2Client = async (credentials) => {
   return null;
 };
 
-const tweetWithClient = async (client, fullText, mediaPath) => {
+const tweetV2 = async (client, fullText) => {
+  const { data } = await client.v2.tweet({ text: fullText });
+  return { platform_post_id: data.id, url: `https://x.com/i/web/status/${data.id}` };
+};
+
+const tweetV1 = async (client, fullText, mediaPath) => {
   if (mediaPath) {
     const fs = require('fs');
     if (fs.existsSync(mediaPath)) {
@@ -80,24 +85,32 @@ const postTweet = async ({ credentials, text, description, hashtags = [], mediaP
   const tags = hashtags.length > 0 ? '\n' + hashtags.join(' ') : '';
   const fullText = (content + tags).substring(0, 280);
 
-  // Try OAuth 2.0 with token refresh
+  // OAuth 2.0 user context → must use v2 API (v1 needs OAuth 1.0a)
   const oauth2Client = await getOAuth2Client(creds);
   if (oauth2Client) {
     try {
-      return await tweetWithClient(oauth2Client, fullText, mediaPath);
+      return await tweetV2(oauth2Client, fullText);
     } catch {
-      // OAuth 2.0 failed for any reason → fall through to OAuth 1.0a
+      // OAuth 2.0 failed → fall through to OAuth 1.0a
     }
   }
 
-  // OAuth 1.0a — always use env vars as reliable fallback
+  // OAuth 1.0a client using env var tokens
   const v1Client = new TwitterApi({
     appKey: process.env.TWITTER_API_KEY,
     appSecret: process.env.TWITTER_API_SECRET,
     accessToken: process.env.TWITTER_ACCESS_TOKEN,
     accessSecret: process.env.TWITTER_ACCESS_TOKEN_SECRET,
   });
-  return await tweetWithClient(v1Client, fullText, mediaPath);
+
+  // Try v1.1 statuses/update (works for apps with Essential/v1.1 access)
+  try {
+    return await tweetV1(v1Client, fullText, mediaPath);
+  } catch {
+    // v1.1 not accessible (new apps) → try v2 with OAuth 1.0a credentials
+  }
+
+  return await tweetV2(v1Client, fullText);
 };
 
 const testConnection = async () => {
