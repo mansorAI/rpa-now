@@ -270,7 +270,10 @@ const NewPostModal = ({ accounts, onClose, onCreated }) => {
           const fd = new FormData();
           fd.append('social_account_id', acc.id);
           fd.append('platform', platform);
-          fd.append('post_type', post.post_type);
+          const postType = post.file
+            ? (post.file.type.startsWith('video') ? 'video' : 'image')
+            : (platform === 'twitter' || platform === 'facebook' ? 'text' : 'video');
+          fd.append('post_type', postType);
           fd.append('title', post.title || '');
           fd.append('description', post.description || '');
           const tags = post.hashtags.split(/[\s,]+/).filter(Boolean).map(h => h.startsWith('#') ? h : `#${h}`);
