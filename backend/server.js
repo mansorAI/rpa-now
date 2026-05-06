@@ -14,6 +14,7 @@ const integrationRoutes = require('./modules/integrations/integrationRoutes');
 const notificationRoutes = require('./modules/notifications/notificationRoutes');
 const socialRoutes = require('./modules/social/socialRoutes');
 const rpaRoutes = require('./modules/rpa/rpaRoutes');
+const chatbotRoutes = require('./modules/chatbot/chatbotRoutes');
 const { startScheduler } = require('./modules/social/scheduler');
 const path = require('path');
 
@@ -54,6 +55,7 @@ app.use('/api/integrations', integrationRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/social', socialRoutes);
 app.use('/api/rpa', rpaRoutes);
+app.use('/api/chatbots', chatbotRoutes);
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.get('/api/health', (req, res) => {

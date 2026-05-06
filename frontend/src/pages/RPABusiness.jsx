@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Bot, Play, Plus, Zap, BarChart3, FileText, Clock, CheckCircle, XCircle, Loader, Sparkles, ChevronRight, AlertTriangle, TrendingUp, Timer, Cpu } from 'lucide-react';
+import { Bot, Play, Plus, Zap, BarChart3, FileText, Clock, CheckCircle, XCircle, Loader, Sparkles, ChevronRight, AlertTriangle, TrendingUp, Timer, Cpu, MessageSquare } from 'lucide-react';
 import api from '../lib/api';
 import toast from 'react-hot-toast';
+import ChatBotsTab from '../components/ChatBotsTab';
 
 const TABS = [
   { id: 'dashboard', label: 'لوحة التحكم', icon: BarChart3 },
@@ -11,6 +12,7 @@ const TABS = [
   { id: 'templates', label: 'القوالب', icon: FileText },
   { id: 'suggestions', label: 'اقتراحات الذكاء الاصطناعي', icon: Zap },
   { id: 'logs', label: 'السجلات', icon: Clock },
+  { id: 'chatbots', label: 'بوت المحادثات', icon: MessageSquare },
 ];
 
 const STATUS_AR = { active: 'نشط', paused: 'موقوف', draft: 'مسودة', archived: 'مؤرشف' };
@@ -499,6 +501,9 @@ export default function RPABusiness() {
               ))}
             </div>
           )}
+
+          {/* ── بوت المحادثات ── */}
+          {tab === 'chatbots' && <ChatBotsTab />}
 
         </div>
       )}

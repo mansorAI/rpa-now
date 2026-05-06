@@ -4,7 +4,7 @@ const path = require('path');
 const { pool } = require('../config/database');
 
 async function migrate() {
-  const schemas = ['schema.sql', 'social_schema.sql', 'rpa_schema.sql'];
+  const schemas = ['schema.sql', 'social_schema.sql', 'rpa_schema.sql', 'chatbot_schema.sql'];
   try {
     for (const file of schemas) {
       const filePath = path.join(__dirname, file);
