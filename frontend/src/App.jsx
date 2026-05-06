@@ -11,6 +11,8 @@ import Subscription from './pages/Subscription';
 import Logs from './pages/Logs';
 import SocialScheduler from './pages/SocialScheduler';
 import RPABusiness from './pages/RPABusiness';
+import SmartOnboarding from './pages/SmartOnboarding';
+import BusinessDashboard from './pages/BusinessDashboard';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfService from './pages/TermsOfService';
 
@@ -47,6 +49,8 @@ export default function App() {
           <Route path="logs" element={<Logs />} />
           <Route path="social" element={<SocialScheduler />} />
           <Route path="rpa-business" element={<RPABusiness />} />
+          <Route path="onboarding" element={<SmartOnboarding />} />
+          <Route path="business" element={<BusinessDashboard />} />
         </Route>
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<TermsOfService />} />

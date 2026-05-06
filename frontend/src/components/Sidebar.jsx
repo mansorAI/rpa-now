@@ -2,10 +2,13 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import {
   LayoutDashboard, Zap, Plug, CreditCard, FileText, LogOut, Bot, CalendarClock, Cpu,
+  Building2, Activity, Sparkles,
 } from 'lucide-react';
 
 const nav = [
   { to: '/dashboard',     icon: LayoutDashboard, label: 'لوحة التحكم' },
+  { to: '/onboarding',    icon: Sparkles,        label: 'إعداد عملي', highlight2: true },
+  { to: '/business',      icon: Activity,        label: 'لوحة أعمالي', highlight2: true },
   { to: '/rpa-business',  icon: Cpu,             label: 'RPA Business', highlight: true },
   { to: '/automations',   icon: Zap,             label: 'الأتمتات' },
   { to: '/social',        icon: CalendarClock,   label: 'جدولة المنشورات' },
@@ -37,7 +40,7 @@ export default function Sidebar() {
 
       {/* Navigation */}
       <nav className="flex-1 p-4 space-y-1">
-        {nav.map(({ to, icon: Icon, label, highlight }) => (
+        {nav.map(({ to, icon: Icon, label, highlight, highlight2 }) => (
           <NavLink
             key={to}
             to={to}
@@ -46,16 +49,21 @@ export default function Sidebar() {
                 isActive
                   ? highlight
                     ? 'bg-violet-600/20 text-violet-400 border border-violet-500/30'
-                    : 'bg-primary-600/10 text-primary-400 border border-primary-500/20'
+                    : highlight2
+                      ? 'bg-emerald-600/20 text-emerald-400 border border-emerald-500/30'
+                      : 'bg-primary-600/10 text-primary-400 border border-primary-500/20'
                   : highlight
                     ? 'text-violet-300 hover:text-white hover:bg-violet-600/10'
-                    : 'text-slate-400 hover:text-white hover:bg-dark-700'
+                    : highlight2
+                      ? 'text-emerald-300 hover:text-white hover:bg-emerald-600/10'
+                      : 'text-slate-400 hover:text-white hover:bg-dark-700'
               }`
             }
           >
             <Icon className="w-5 h-5" />
             {label}
             {highlight && <span className="mr-auto text-xs bg-violet-600/30 text-violet-300 px-1.5 py-0.5 rounded-full">AI</span>}
+            {highlight2 && <span className="mr-auto text-xs bg-emerald-600/30 text-emerald-300 px-1.5 py-0.5 rounded-full">جديد</span>}
           </NavLink>
         ))}
       </nav>
