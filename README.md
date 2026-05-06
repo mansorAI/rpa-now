@@ -87,6 +87,13 @@ RPA/
 │       │   ├── fileProcessor.js     # تحليل Excel/CSV/PDF/TXT
 │       │   ├── chatbotController.js # CRUD + محادثات
 │       │   └── chatbotRoutes.js     # مسارات /api/chatbots/*
+│       ├── business/                # الإعداد الذكي + الفريق
+│       │   ├── onboardingAI.js      # Claude يولّد إعداد العمل كاملاً
+│       │   ├── businessController.js# Onboarding + Team + Audit
+│       │   └── businessRoutes.js    # مسارات /api/business/*
+│       ├── whatsapp/                # بوت واتساب
+│       │   ├── whatsappController.js# Webhook + إدارة البوتات
+│       │   └── whatsappRoutes.js    # مسارات /api/whatsapp/*
 │       └── social/
 │           ├── platforms/           # YouTube · Twitter · Facebook · Instagram · TikTok · Snapchat
 │           ├── scheduler.js         # جدولة تلقائية كل دقيقة
@@ -95,10 +102,12 @@ RPA/
 │   └── src/
 │       ├── pages/
 │       │   ├── Dashboard.jsx        # لوحة التحكم + إحصائيات
+│       │   ├── SmartOnboarding.jsx  # معالج الإعداد الذكي (5 خطوات)
+│       │   ├── BusinessDashboard.jsx# لوحة المدير/الموظف + واتساب + فريق + سجل
 │       │   ├── AutomationBuilder.jsx # بناء أتمتة بالأزرار أو AI
 │       │   ├── Automations.jsx      # قائمة الأتمتات
 │       │   ├── SocialScheduler.jsx  # جدولة مواقع التواصل
-│       │   ├── RPABusiness.jsx      # RPA Business (7 تبويبات + بوت)
+│       │   ├── RPABusiness.jsx      # RPA Business (8 تبويبات + بوت)
 │       │   ├── Integrations.jsx     # ربط الخدمات
 │       │   ├── Subscription.jsx     # خطط الاشتراك
 │       │   └── Logs.jsx             # سجلات التشغيل
@@ -138,6 +147,10 @@ RPA/
 | `chatbot_knowledge` | قاعدة معرفة كل بوت (chunks) |
 | `chatbot_conversations` | محادثات العملاء |
 | `chatbot_messages` | رسائل كل محادثة |
+| `business_profiles` | ملف العمل + إعدادات AI المولّدة |
+| `team_members` | أعضاء الفريق مع الأدوار |
+| `audit_logs` | سجل كل التعديلات والإجراءات |
+| `whatsapp_bots` | ربط أرقام واتساب بالبوتات |
 
 ---
 
@@ -216,6 +229,7 @@ cd frontend && npm run dev
 | `TIKTOK_CLIENT_KEY` | مفتاح TikTok API |
 | `TIKTOK_CLIENT_SECRET` | سر TikTok API |
 | `TIKTOK_REDIRECT_URI` | رابط callback لـ TikTok |
+| `TWILIO_WHATSAPP_NUMBER` | رقم واتساب Twilio (للبوت) |
 
 ---
 
@@ -321,6 +335,30 @@ GET    /api/social/auth/tiktok/callback
 GET    /api/social/auth/snapchat/callback
 ```
 
+### Business Intelligence
+```
+GET  /api/business/profile          # ملف العمل + إعدادات AI المولّدة
+POST /api/business/onboarding       # حفظ الإعداد + تحليل Claude + إنشاء البوت
+
+GET    /api/business/team           # قائمة الفريق مع الأدوار
+POST   /api/business/team/invite    # إضافة عضو بالبريد الإلكتروني
+PUT    /api/business/team/:id       # تعديل الدور أو القسم
+DELETE /api/business/team/:id       # إزالة عضو
+
+GET  /api/business/audit            # سجل التعديلات (آخر 100 إجراء)
+```
+
+### WhatsApp Bot
+```
+POST /api/whatsapp/webhook          # ⚡ بدون مصادقة — Twilio يرسل هنا
+
+GET    /api/whatsapp/bots           # قائمة البوتات المربوطة
+POST   /api/whatsapp/bots           # ربط رقم واتساب ببوت
+PUT    /api/whatsapp/bots/:id       # تعديل إعدادات الربط
+DELETE /api/whatsapp/bots/:id       # حذف الربط
+GET    /api/whatsapp/conversations  # محادثات واتساب
+```
+
 ### Billing
 ```
 GET  /api/billing/plans
@@ -380,16 +418,27 @@ GET  /api/billing/transactions
 
 ## التغييرات الأخيرة
 
+- **إعداد عملي (SmartOnboarding)** — معالج 5 خطوات، Claude يولّد بوت + أتمتات + هيكل فريق تلقائياً
+- **لوحة أعمالي (BusinessDashboard)** — مراقبة كاملة: إحصائيات، فريق، محادثات واتساب، سجل التعديلات
+- **بوت واتساب** — ويب هوك Twilio يستقبل الرسائل ويرد بالذكاء الاصطناعي تلقائياً
+- **نظام الفريق** — أدوار (مالك/مدير/موظف/مشاهد) مع صلاحيات مختلفة
+- **سجل التعديلات (Audit Log)** — كل إجراء يُسجَّل مع اسم المستخدم والوقت
 - **بوت المحادثات** — وحدة كاملة لبناء بوتات خدمة العملاء بالذكاء الاصطناعي (RAG + Claude)
 - **RPA Business** — وحدة أتمتة متكاملة مع 8 تبويبات ومحرك تنفيذ + AI builder
 - **Anthropic Claude** — استبدال OpenAI بـ Claude (Haiku) في جميع وظائف الذكاء الاصطناعي
 - **TikTok API** — إنشاء تطبيق TikTok Developer وربط Login Kit + Content Posting API
-- **صفحة Privacy Policy** — `https://rpa-now.vercel.app/privacy`
-- **صفحة Terms of Service** — `https://rpa-now.vercel.app/terms`
-- **روابط السياسات** — مضافة في صفحة تسجيل الدخول
-- **TikTok App Review** — تم التقديم للمراجعة (قيد الانتظار)
-- **OAuth كامل** لجميع المنصات الستة (قراءة + كتابة)
-- **إصلاح Twitter 401** — fallback تلقائي من OAuth 2.0 إلى OAuth 1.0a
+
+---
+
+## WhatsApp Bot Setup
+
+| الخطوة | التفاصيل |
+|--------|---------|
+| 1. Twilio Account | أنشئ حساباً على twilio.com |
+| 2. WhatsApp Sandbox | Messaging → Try it out → Send a WhatsApp message |
+| 3. Webhook URL | `https://rpa-now-production.up.railway.app/api/whatsapp/webhook` |
+| 4. Railway ENV | أضف `TWILIO_WHATSAPP_NUMBER=+14155238886` |
+| 5. ربط البوت | لوحة أعمالي → بوت واتساب → ربط رقم |
 
 ---
 
