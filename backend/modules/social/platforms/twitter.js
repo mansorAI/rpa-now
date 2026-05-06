@@ -60,16 +60,7 @@ const getOAuth2Client = async (credentials) => {
   return null;
 };
 
-const postTweet = async ({ credentials, text, description, hashtags = [], mediaPath, title }) => {
-  const creds = typeof credentials === 'string' ? JSON.parse(credentials) : credentials;
-
-  let client = await getOAuth2Client(creds);
-  if (!client) client = getClient(creds);
-
-  const content = text || description || title || '';
-  const tags = hashtags.length > 0 ? '\n' + hashtags.join(' ') : '';
-  const fullText = (content + tags).substring(0, 280);
-
+const tweetWithClient = async (client, fullText, mediaPath) => {
   if (mediaPath) {
     const fs = require('fs');
     if (fs.existsSync(mediaPath)) {
@@ -78,9 +69,31 @@ const postTweet = async ({ credentials, text, description, hashtags = [], mediaP
       return { platform_post_id: data.id, url: `https://x.com/i/web/status/${data.id}` };
     }
   }
-
   const { data } = await client.v2.tweet(fullText);
   return { platform_post_id: data.id, url: `https://x.com/i/web/status/${data.id}` };
+};
+
+const postTweet = async ({ credentials, text, description, hashtags = [], mediaPath, title }) => {
+  const creds = typeof credentials === 'string' ? JSON.parse(credentials) : credentials;
+
+  const content = text || description || title || '';
+  const tags = hashtags.length > 0 ? '\n' + hashtags.join(' ') : '';
+  const fullText = (content + tags).substring(0, 280);
+
+  // Try OAuth 2.0 with token refresh
+  const oauth2Client = await getOAuth2Client(creds);
+  if (oauth2Client) {
+    try {
+      return await tweetWithClient(oauth2Client, fullText, mediaPath);
+    } catch (err) {
+      if (err.code !== 401) throw err;
+      // 401 → fall through to OAuth 1.0a
+    }
+  }
+
+  // OAuth 1.0a — use stored tokens or env vars
+  const v1Client = getClient(creds);
+  return await tweetWithClient(v1Client, fullText, mediaPath);
 };
 
 const testConnection = async () => {
