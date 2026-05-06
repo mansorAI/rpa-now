@@ -11,8 +11,8 @@ const getClient = (credentials = {}) => {
 
 const getAuthUrl = (state) => {
   const client = new TwitterApi({
-    clientId: process.env.TWITTER_API_KEY,
-    clientSecret: process.env.TWITTER_API_SECRET,
+    clientId: process.env.TWITTER_CLIENT_ID || process.env.TWITTER_API_KEY,
+    clientSecret: process.env.TWITTER_CLIENT_SECRET || process.env.TWITTER_API_SECRET,
   });
   const { url, codeVerifier } = client.generateOAuth2AuthLink(
     process.env.TWITTER_REDIRECT_URI,
@@ -45,8 +45,8 @@ const getOAuth2Client = async (credentials) => {
   if (credentials.oauth2_refresh_token) {
     try {
       const base = new TwitterApi({
-        clientId: process.env.TWITTER_API_KEY,
-        clientSecret: process.env.TWITTER_API_SECRET,
+        clientId: process.env.TWITTER_CLIENT_ID || process.env.TWITTER_API_KEY,
+        clientSecret: process.env.TWITTER_CLIENT_SECRET || process.env.TWITTER_API_SECRET,
       });
       const { client } = await base.refreshOAuth2Token(credentials.oauth2_refresh_token);
       return client;
