@@ -65,12 +65,12 @@ const tweetWithClient = async (client, fullText, mediaPath) => {
     const fs = require('fs');
     if (fs.existsSync(mediaPath)) {
       const mediaId = await client.v1.uploadMedia(mediaPath);
-      const { data } = await client.v2.tweet({ text: fullText, media: { media_ids: [mediaId] } });
-      return { platform_post_id: data.id, url: `https://x.com/i/web/status/${data.id}` };
+      const result = await client.v1.tweet(fullText, { media_ids: mediaId });
+      return { platform_post_id: result.id_str, url: `https://x.com/i/web/status/${result.id_str}` };
     }
   }
-  const { data } = await client.v2.tweet(fullText);
-  return { platform_post_id: data.id, url: `https://x.com/i/web/status/${data.id}` };
+  const result = await client.v1.tweet(fullText);
+  return { platform_post_id: result.id_str, url: `https://x.com/i/web/status/${result.id_str}` };
 };
 
 const postTweet = async ({ credentials, text, description, hashtags = [], mediaPath, title }) => {
