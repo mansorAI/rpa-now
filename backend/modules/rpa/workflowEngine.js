@@ -1,7 +1,6 @@
 const { pool } = require('../../config/database');
-const OpenAI = require('openai');
-
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const Anthropic = require('@anthropic-ai/sdk');
+const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 async function executeWorkflow(workflowId, inputData = {}, triggeredBy = 'manual') {
   const client = await pool.connect();
@@ -106,15 +105,15 @@ async function executeNode(node, context) {
 
     case 'ai_action': {
       const prompt = interpolate(config.prompt || '', context);
-      const res = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
-        messages: [
-          { role: 'system', content: 'You are an automation assistant. Return JSON only.' },
-          { role: 'user', content: prompt },
-        ],
-        response_format: { type: 'json_object' },
+      const res = await anthropic.messages.create({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 1024,
+        system: 'You are an automation assistant. Return JSON only.',
+        messages: [{ role: 'user', content: prompt }],
       });
-      try { return JSON.parse(res.choices[0].message.content); } catch { return {}; }
+      const text = res.content[0].text;
+      const match = text.match(/\{[\s\S]*\}/);
+      try { return JSON.parse(match ? match[0] : text); } catch { return {}; }
     }
 
     case 'delay': {
@@ -185,14 +184,13 @@ function topologicalSort(nodes, edges) {
 
 async function diagnoseError(errorMessage, workflow) {
   try {
-    const res = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        { role: 'system', content: 'You are an RPA error diagnosis expert. Be concise.' },
-        { role: 'user', content: `Workflow "${workflow.name}" failed with: ${errorMessage}. Diagnose and suggest a fix in 2 sentences.` },
-      ],
+    const res = await anthropic.messages.create({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 256,
+      system: 'You are an RPA error diagnosis expert. Be concise.',
+      messages: [{ role: 'user', content: `Workflow "${workflow.name}" failed with: ${errorMessage}. Diagnose and suggest a fix in 2 sentences.` }],
     });
-    return res.choices[0].message.content;
+    return res.content[0].text;
   } catch {
     return 'Could not diagnose error automatically.';
   }
